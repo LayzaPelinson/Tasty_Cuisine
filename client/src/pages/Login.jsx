@@ -1,97 +1,71 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../lib/authService';
 import '../styles/login.css';
 
 export default function Login() {
-  const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState('usuario');
-  const [loginMode, setLoginMode] = useState('login');
-  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    nomeDeUsuario: '',
+    senha: ''
+  });
+  const [userType, setUserType] = useState<'usuario' | 'chefe'>('usuario');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Dados de chefes fixos
-  const chefesFixos = [
-    { email: 'marie@confeitco.com', senha: '123456', tipo: 'chefe', id: 'marie', nome: 'Marie Laurent' },
-    { email: 'marco@confeitco.com', senha: '123456', tipo: 'chefe', id: 'marco', nome: 'Marco Bianchi' },
-    { email: 'sofia@confeitco.com', senha: '123456', tipo: 'chefe', id: 'sofia', nome: 'Sofia Romano' },
-    { email: 'pierre@confeitco.com', senha: '123456', tipo: 'chefe', id: 'pierre', nome: 'Pierre Dubois' }
-  ];
-
-  const getUsuarios = () => {
-    return JSON.parse(localStorage.getItem('usuarios_cadastrados') || '[{"email":"usuario@email.com","senha":"123456","nome":"Usuário Teste","tipo":"usuario"}]');
-  };
-
-  const getChefes = () => {
-    return JSON.parse(localStorage.getItem('chefes_cadastrados') || '[]');
-  };
-
-  const handleLoginSubmit = (e, tipo) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage('');
+    setLoading(true);
+    setError(null);
 
-    const emailInput = document.getElementById(`${tipo}-email`);
-    const senhaInput = document.getElementById(`${tipo}-senha`);
+    try {
+      let result;
 
-    if (!emailInput || !senhaInput) return;
-
-    const email = emailInput.value;
-    const senha = senhaInput.value;
-
-    const lista = tipo === 'usuario' ? getUsuarios() : [...chefesFixos, ...getChefes()];
-    const encontrado = lista.find(u => u.email === email && u.senha === senha);
-
-    if (encontrado) {
-      localStorage.setItem('usuarioLogado', JSON.stringify(encontrado));
-      if (tipo === 'chefe') {
-        setLocation(`/perfil-chefe?id=${encontrado.id}`);
+      if (userType === 'usuario') {
+        result = await authService.loginUsuario(
+          formData.nomeDeUsuario,
+          formData.senha
+        );
       } else {
-        setLocation('/perfil');
+        result = await authService.loginChefe(
+          formData.nomeDeUsuario,
+          formData.senha
+        );
       }
-    } else {
-      setErrorMessage(tipo === 'usuario' ? 'E-mail ou senha incorretos.' : 'Credenciais inválidas para chefe.');
+
+      if (result.success && result.user) {
+        // Salvar no localStorage
+        localStorage.setItem('isLogged', 'true');
+        localStorage.setItem('userId', String(result.user.id));
+        localStorage.setItem('userType', result.user.tipo);
+        localStorage.setItem('userName', result.user.nome);
+        localStorage.setItem('userEmail', result.user.email);
+
+        console.log('Login bem-sucedido:', result.user);
+        navigate('/home');
+      } else {
+        setError(result.error || 'Erro ao fazer login');
+      }
+    } catch (error) {
+      setError(
+        'Erro ao fazer login: ' +
+        (error instanceof Error ? error.message : 'Desconhecido')
+      );
+      console.error('Erro ao fazer login:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCadastroSubmit = (e, tipo) => {
-    e.preventDefault();
-    setErrorMessage('');
-
-    if (tipo === 'usuario') {
-      const nome = document.getElementById('cad-usuario-nome')?.value;
-      const email = document.getElementById('cad-usuario-email')?.value;
-      const senha = document.getElementById('cad-usuario-senha')?.value;
-
-      const lista = getUsuarios();
-      if (lista.find(u => u.email === email)) {
-        setErrorMessage('Este e-mail já está cadastrado.');
-        return;
-      }
-
-      const novo = { nome, email, senha, tipo: 'usuario' };
-      lista.push(novo);
-      localStorage.setItem('usuarios_cadastrados', JSON.stringify(lista));
-      localStorage.setItem('usuarioLogado', JSON.stringify(novo));
-      setLocation('/perfil');
-    } else {
-      const nome = document.getElementById('cad-chefe-nome')?.value;
-      const especialidade = document.getElementById('cad-chefe-especialidade')?.value;
-      const localizacao = document.getElementById('cad-chefe-localizacao')?.value;
-      const email = document.getElementById('cad-chefe-email')?.value;
-      const senha = document.getElementById('cad-chefe-senha')?.value;
-
-      const lista = getChefes();
-      if ([...chefesFixos, ...lista].find(u => u.email === email)) {
-        setErrorMessage('Este e-mail já está cadastrado.');
-        return;
-      }
-
-      const id = 'chef_' + Date.now();
-      const novo = { nome, especialidade, localizacao, email, senha, tipo: 'chefe', id };
-      lista.push(novo);
-      localStorage.setItem('chefes_cadastrados', JSON.stringify(lista));
-      localStorage.setItem('usuarioLogado', JSON.stringify(novo));
-      setLocation('/perfil-chefe');
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
+
+
+
 
   return (
     <div className="login-page">
@@ -128,16 +102,32 @@ export default function Login() {
                 <div className="login-avatar">👤</div>
                 <h2>Bem-vindo de volta</h2>
                 <p className="login-sub">Acesse sua conta para salvar receitas favoritas</p>
-                <label>
-                  E-mail
-                  <input type="email" id="usuario-email" placeholder="seu@email.com" required />
-                </label>
-                <label>
-                  Senha
-                  <input type="password" id="usuario-senha" placeholder="••••••••" required />
-                </label>
+                <label htmlFor="nomeDeUsuario">Nome de Usuário</label>
+                <input
+                  type="text"
+                  name="nomeDeUsuario"
+                  id="nomeDeUsuario"
+                  value={formData.nomeDeUsuario}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                />
+
+                <label htmlFor="senha">Senha</label>
+              <input
+                type="password"
+                name="senha"
+                id="senha"
+                value={formData.senha}
+                onChange={handleChange}
+                required
+                disabled={loading}
+              />
                 {errorMessage && <p className="login-erro">{errorMessage}</p>}
-                <button type="submit" className="btn-login">Entrar</button>
+
+               <button type="submit" className="sign" disabled={loading}>
+              {loading ? 'Entrando...' : 'Login'}
+            </button>
                 <p className="login-rodape">
                   Não tem conta?{' '}
                   <a href="#" onClick={(e) => { e.preventDefault(); setLoginMode('cadastro'); setErrorMessage(''); }}>
@@ -146,6 +136,8 @@ export default function Login() {
                 </p>
               </form>
             )}
+
+
 
             {/* Cadastro Usuário */}
             {loginMode === 'cadastro' && (
