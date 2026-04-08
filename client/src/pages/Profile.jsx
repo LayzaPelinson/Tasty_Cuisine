@@ -4,238 +4,163 @@ import { receitas } from '../data/recipes.js';
 import RecipeCard from '../components/RecipeCard.jsx';
 import { useFavorites } from '../hooks/useFavorites.js';
 import { useHistory } from '../hooks/useFavorites.js';
+// Importação corrigida para o caminho que você indicou
+import { usuariosAPI, chefesAPI } from '../lib/api.ts'; 
 import '../styles/profile.css';
 
 export default function Profile() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('favoritos');
   const [isEditing, setIsEditing] = useState(false);
-  const [userName, setUserName] = useState('Layza Pelinson');
-  const [userEmail, setUserEmail] = useState('layza@email.com');
-  const [preferencias, setPreferencias] = useState([]);
-  const [editingPreferencias, setEditingPreferencias] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Estados baseados exatamente nos atributos da sua classe Usuario.java
+  const [codUser, setCodUser] = useState(0);
+  const [nomeCompleto, setNomeCompleto] = useState('');
+  const [nomeDeUsuario, setNomeDeUsuario] = useState('');
+  const [idade, setIdade] = useState(14); // Valor mínimo da sua @Min(14)
+  const [gmail, setGmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [restricoesAlimentares, setRestricoesAlimentares] = useState('');
+
+  const userId = localStorage.getItem('userId');
+  const userType = localStorage.getItem('userType');
   const { favorites } = useFavorites();
   const { history } = useHistory();
 
-  const preferenciasOptions = [
-    { id: 'vegetariano', label: 'Vegetariano' },
-    { id: 'vegano', label: 'Vegano' },
-    { id: 'sem-gluten', label: 'Sem Glúten' },
-    { id: 'sem-lactose', label: 'Sem Lactose' },
-    { id: 'low-carb', label: 'Low Carb' },
-    { id: 'proteina-alta', label: 'Proteína Alta' },
-    { id: 'organico', label: 'Orgânico' },
-    { id: 'diabetico', label: 'Diabético' }
+  // Opções de restrições (ajustado para salvar como string única no banco)
+  const restricoesOptions = [
+    "Vegetariano", "Vegano", "Sem Glúten", "Sem Lactose", "Low Carb", "Diabético"
   ];
 
   useEffect(() => {
-    const savedPrefs = JSON.parse(localStorage.getItem('preferenciasAlimentares') || '[]');
-    setPreferencias(savedPrefs);
-    setEditingPreferencias(savedPrefs);
-  }, []);
+    async function loadProfile() {
+      if (!userId) {
+        setLocation('/login');
+        return;
+      }
+      
+      const api = userType === 'chefe' ? chefesAPI : usuariosAPI;
+      const response = await api.getById(userId);
 
-  const handleEditClick = () => {
-    setEditingPreferencias([...preferencias]);
-    setIsEditing(true);
+      if (response.data) {
+        const d = response.data;
+        setCodUser(d.codUser);
+        setNomeCompleto(d.nomeCompleto || '');
+        setNomeDeUsuario(d.nomeDeUsuario || '');
+        setIdade(d.idade || 14);
+        setGmail(d.gmail || '');
+        setSenha(d.senha || ''); // Importante manter a senha para o update
+        setRestricoesAlimentares(d.restricoesAlimentares || '');
+      }
+      setLoading(false);
+    }
+    loadProfile();
+  }, [userId, userType, setLocation]);
+
+  const handleSaveProfile = async () => {
+    const api = userType === 'chefe' ? chefesAPI : usuariosAPI;
+    
+    // O Objeto payload agora segue exatamente os nomes da sua Entity Usuario.java
+    const payload = {
+      codUser: Number(userId),
+      nomeCompleto: nomeCompleto,
+      nomeDeUsuario: nomeDeUsuario,
+      idade: Number(idade), // Garante que não vá 0 para passar na @Min(14)
+      gmail: gmail,        // Nome exato do atributo no Java
+      senha: senha,        // Enviando a senha atual para não dar erro de NULL no banco
+      restricoesAlimentares: restricoesAlimentares
+    };
+
+    const response = await api.update(userId, payload);
+
+    if (!response.error) {
+      setIsEditing(false);
+      localStorage.setItem('userName', nomeCompleto);
+      alert("Perfil atualizado com sucesso!");
+    } else {
+      console.error("Erro no Update:", response.error);
+      alert("Erro ao atualizar: Verifique se os dados são válidos.");
+    }
   };
 
-  const handleSaveProfile = () => {
-    localStorage.setItem('preferenciasAlimentares', JSON.stringify(editingPreferencias));
-    setPreferencias(editingPreferencias);
-    setIsEditing(false);
-  };
-
-  const togglePreferencia = (id) => {
-    setEditingPreferencias(prev =>
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    );
-  };
-
-  const favoriteRecipes = favorites
-    .map(id => ({ id, recipe: receitas[id] }))
-    .filter(item => item.recipe);
-
-  const historyRecipes = history
-    .map(id => ({ id, recipe: receitas[id] }))
-    .filter(item => item.recipe);
+  if (loading) return <div className="perfil">Carregando...</div>;
 
   return (
     <div className="perfil">
-      {/* HEADER PERFIL */}
       <section className="perfil-header">
         <div className="perfil-info">
           <div className="avatar">👤</div>
           <div>
-            <h1>{userName}</h1>
-            <p>{userEmail}</p>
+            <h1>{nomeCompleto}</h1>
+            <p>{gmail} | {idade} anos</p>
           </div>
         </div>
-        <button className="btn-editar" onClick={handleEditClick}>
-          ✏️ Editar Perfil
+        <button className="btn-editar" onClick={() => setIsEditing(!isEditing)}>
+          {isEditing ? 'Cancelar' : '✏️ Editar Perfil'}
         </button>
       </section>
 
-      {/* EDIÇÃO */}
       {isEditing && (
         <section className="perfil-edicao">
-          <div className="perfil-info">
-            <div className="avatar">👤</div>
-            <div className="inputs">
-              <input
-                type="text"
-                placeholder="Nome"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-              />
-              <input
-                type="email"
-                placeholder="E-mail"
-                value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
-              />
-              <div style={{ marginTop: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
-                  Preferências Alimentares:
-                </label>
-                <div className="preferencias-edicao">
-                  {preferenciasOptions.map(pref => (
-                    <span
-                      key={pref.id}
-                      className={`tag-editavel ${editingPreferencias.includes(pref.id) ? 'ativo' : ''}`}
-                      onClick={() => togglePreferencia(pref.id)}
-                    >
-                      {pref.label}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <div className="inputs">
+            <label>Nome Completo:</label>
+            <input 
+              type="text" 
+              value={nomeCompleto} 
+              onChange={(e) => setNomeCompleto(e.target.value)} 
+            />
+            
+            <label>E-mail (Gmail):</label>
+            <input 
+              type="email" 
+              value={gmail} 
+              onChange={(e) => setGmail(e.target.value)} 
+            />
+
+            <label>Nome de Usuário:</label>
+            <input 
+              type="text" 
+              value={nomeDeUsuario} 
+              onChange={(e) => setNomeDeUsuario(e.target.value)} 
+            />
+
+            <label>Restrições Alimentares:</label>
+            <input 
+              type="text" 
+              value={restricoesAlimentares} 
+              placeholder="Ex: Sem glúten, Lactose..."
+              onChange={(e) => setRestricoesAlimentares(e.target.value)} 
+            />
+            
+            <button className="btn-salvar" onClick={handleSaveProfile}>Salvar Alterações</button>
           </div>
-          <button className="btn-salvar" onClick={handleSaveProfile}>
-            Salvar
-          </button>
         </section>
       )}
 
-      {/* ABAS */}
       <nav className="perfil-tabs">
-        <button
-          className={activeTab === 'favoritos' ? 'active' : ''}
-          onClick={() => setActiveTab('favoritos')}
-        >
-          ❤️ Favoritos
-        </button>
-        <button
-          className={activeTab === 'historico' ? 'active' : ''}
-          onClick={() => setActiveTab('historico')}
-        >
-          🕒 Histórico
-        </button>
-        <button
-          className={activeTab === 'preferencias' ? 'active' : ''}
-          onClick={() => setActiveTab('preferencias')}
-        >
-          ⚙️ Preferências
-        </button>
+        <button className={activeTab === 'favoritos' ? 'active' : ''} onClick={() => setActiveTab('favoritos')}>❤️ Favoritos</button>
+        <button className={activeTab === 'preferencias' ? 'active' : ''} onClick={() => setActiveTab('preferencias')}>⚙️ Configurações</button>
       </nav>
 
-      {/* FAVORITOS */}
       {activeTab === 'favoritos' && (
-        <section className="favoritos tab-content">
-          <div className="titulo">
-            <h2>Receitas Favoritas</h2>
+        <section className="tab-content">
+          <div className="recipes-grid">
+            {favorites.map(id => (
+              <RecipeCard key={id} recipe={receitas[id]} id={id} isFavorite={true} />
+            ))}
           </div>
-          {favoriteRecipes.length > 0 ? (
-            <div className="recipes-grid">
-                {favoriteRecipes.map(({ id, recipe }) => (
-                  <RecipeCard
-                    key={id}
-                    recipe={recipe}
-                    id={id}
-                    isFavorite={true}
-                  />
-                ))}
-            </div>
-          ) : (
-            <p style={{ color: '#888' }}>Nenhuma receita favorita ainda.</p>
-          )}
         </section>
       )}
 
-      {/* HISTÓRICO */}
-      {activeTab === 'historico' && (
-        <section className="historico tab-content">
-          <div className="titulo">
-            <h2>Histórico Recente</h2>
-          </div>
-          {historyRecipes.length > 0 ? (
-            <div className="recipes-grid">
-                {historyRecipes.map(({ id, recipe }) => (
-                  <RecipeCard
-                    key={id}
-                    recipe={recipe}
-                    id={id}
-                    isFavorite={favorites.includes(id)}
-                  />
-                ))}
-            </div>
-          ) : (
-            <p style={{ color: '#888' }}>Nenhuma receita visualizada ainda.</p>
-          )}
-        </section>
-      )}
-
-      {/* PREFERÊNCIAS */}
       {activeTab === 'preferencias' && (
-        <section className="configuracoes tab-content">
+        <section className="tab-content">
           <div className="card-config">
-            <h3>Preferências Alimentares</h3>
-            <p>Suas preferências selecionadas para sugestões personalizadas.</p>
-            <div className="tags" id="preferencias-selecionadas">
-              {preferencias.length === 0 ? (
-                <p style={{ color: '#888', fontStyle: 'italic' }}>
-                  Nenhuma preferência selecionada. Edite seu perfil para adicionar.
-                </p>
-              ) : (
-                preferencias.map(pref => {
-                  const label = preferenciasOptions.find(p => p.id === pref)?.label || pref;
-                  return (
-                    <span key={pref} className="tag ativo">
-                      {label}
-                    </span>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          <div className="card-config">
-            <h3>Notificações</h3>
-            <div className="linha">
-              <div>
-                <strong>Novas receitas</strong>
-                <p>Receba alertas de novas receitas</p>
-              </div>
-              <button className="btn-outline">Ativar</button>
-            </div>
-            <div className="linha">
-              <div>
-                <strong>Dicas semanais</strong>
-                <p>Receba dicas culinárias por email</p>
-              </div>
-              <button className="btn-outline">Ativar</button>
-            </div>
-          </div>
-
-          <div className="card-config full">
-            <h3>Conta</h3>
-            <button className="btn-outline">Alterar Senha</button>
-            <button className="btn-danger" onClick={() => {
-              localStorage.removeItem('usuarioLogado');
-              setLocation('/login');
-            }}>
-              Sair da Conta
-            </button>
+            <h3>Meus Dados</h3>
+            <p><strong>Usuário:</strong> {nomeDeUsuario}</p>
+            <p><strong>Idade:</strong> {idade} anos</p>
+            <p><strong>Restrições:</strong> {restricoesAlimentares || 'Nenhuma'}</p>
+            <button className="btn-outline" onClick={() => { localStorage.clear(); setLocation('/login'); }}>Sair da Conta</button>
           </div>
         </section>
       )}

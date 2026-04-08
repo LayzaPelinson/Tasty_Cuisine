@@ -11,11 +11,12 @@ import RecipeDetail from "./pages/RecipeDetail.jsx";
 import Chefs from "./pages/Chefs.jsx";
 import ChefDetail from "./pages/ChefDetail.jsx";
 import About from "./pages/About.jsx";
-import Login from "./pages/Login.jsx";
+import Login from "./pages/Login.tsx";
 import Profile from "./pages/Profile.jsx";
 import PublishRecipe from "./pages/PublishRecipe.jsx";
 import ChefProfile from "./pages/ChefProfile.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Cadastro from './pages/Register.jsx';
 import "./styles/app.css";
 
 function Router() {
@@ -35,6 +36,7 @@ function Router() {
           <Route path="/publicar-receita" component={PublishRecipe} />
           <Route path="/perfil-chefe" component={ChefProfile} />
           <Route path="/404" component={NotFound} />
+          <Route path="/cadastro" component={Cadastro}/>
           {/* Final fallback route */}
           <Route component={NotFound} />
         </Switch>
