@@ -1,47 +1,36 @@
+import { useState, useEffect } from 'react';
 import { useRoute } from 'wouter';
-import { receitas } from '../data/recipes.js';
-import { useFavorites } from '../hooks/useFavorites.js';
-import { useHistory } from '../hooks/useFavorites.js';
-import RecipeCard from '../components/RecipeCard.jsx';
+import { receitasAPI } from '../lib/api.ts'; 
+import { useFavorites, useHistory } from '../hooks/useFavorites.js';
 import '../styles/recipe-detail.css';
 
 export default function RecipeDetail() {
   const [match, params] = useRoute('/receita/:id');
-  const goBack = () => window.history.back();
+  const [recipe, setRecipe] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { favorites, toggleFavorite } = useFavorites();
   const { addToHistory } = useHistory();
 
-  if (!match || !params?.id) {
-    return <div className="recipe-detail"><p>Receita não encontrada.</p></div>;
-  }
+  const goBack = () => window.history.back();
 
-  const recipe = receitas[params.id];
-  if (!recipe) {
-    return <div className="recipe-detail"><p>Receita não encontrada.</p></div>;
-  }
-
-  addToHistory(params.id);
-
-  const isSaved = favorites.includes(params.id);
-  const relatedRecipes = recipe.relacionadas
-    .map(id => ({ id, recipe: receitas[id] }))
-    .filter(item => item.recipe);
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: recipe.nome,
-          url: window.location.href
-        });
-      } catch (err) {
-        console.log('Share cancelled');
+  useEffect(() => {
+    async function getDetail() {
+      if (params?.id) {
+        const response = await receitasAPI.getById(params.id);
+        if (response.data) {
+          setRecipe(response.data);
+          addToHistory(params.id);
+        }
       }
-    } else {
-      alert('Link copiado para a área de transferência!');
-      navigator.clipboard.writeText(window.location.href);
+      setLoading(false);
     }
-  };
+    getDetail();
+  }, [params?.id]);
+
+  if (loading) return <div className="recipe-detail"><p>Carregando detalhes...</p></div>;
+  if (!recipe) return <div className="recipe-detail"><p>Receita não encontrada.</p></div>;
+
+  const isSaved = favorites.includes(String(recipe.codReceitas));
 
   return (
     <div className="recipe-detail">
@@ -50,76 +39,46 @@ export default function RecipeDetail() {
       </button>
 
       <div className="recipe-hero">
-        <img src={recipe.imagem} alt={recipe.nome} />
+        <div className="recipe-hero-placeholder" style={{width: '100%', height: '300px', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+           🖼️ (Foto da Receita)
+        </div>
         <div className="recipe-hero-info">
-          <h1>{recipe.nome}</h1>
+          <h1>{recipe.nomeReceita}</h1>
           <div className="recipe-badges">
-            <span className="badge">{recipe.categoria}</span>
-            <span className={`tag ${recipe.dificuldade === 'Fácil' ? 'tag-easy' : recipe.dificuldade === 'Médio' ? 'tag-medium' : 'tag-hard'}`}>
-              {recipe.dificuldade}
-            </span>
+            <span className="badge">Receita da Casa</span>
+            <span className="tag tag-medium">Original</span>
           </div>
           <div className="recipe-info">
-            <span>⏱ {recipe.tempo}</span>
-            <span>👨🍳 {recipe.chef}</span>
+            <span>⏱ Sob consulta</span>
+            <span>👨‍🍳 {recipe.chefe?.nomeCompleto || "Chef Autor"}</span>
           </div>
           <p>{recipe.descricao}</p>
           <div className="recipe-actions">
             <button
               className={`btn-save ${isSaved ? 'saved' : ''}`}
-              onClick={() => toggleFavorite(params.id)}
+              onClick={() => toggleFavorite(String(recipe.codReceitas))}
             >
               {isSaved ? '♥ Receita Salva' : '♡ Salvar Receita'}
-            </button>
-            <button className="btn-share" onClick={handleShare}>
-              ⬆ Compartilhar
             </button>
           </div>
         </div>
       </div>
 
       <div className="recipe-details">
+        {/* Como o back-end usa Manual2 (NVARCHAR(MAX)), exibimos o texto formatado */}
         <div className="card-config">
-          <h3>Ingredientes</h3>
-          <ul className="lista-verde">
-            {recipe.ingredientes.map((ing, idx) => (
-              <li key={idx}>{ing}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="card-config">
-          <h3>Modo de Preparo</h3>
-          <ol className="lista-numerada">
-            {recipe.preparo.map((step, idx) => (
-              <li key={idx}>{step}</li>
-            ))}
-          </ol>
-        </div>
-      </div>
-
-      {recipe.dica && (
-        <div className="recipe-tip">
-          <h3>💡 Dica do Chef</h3>
-          <p>{recipe.dica}</p>
-        </div>
-      )}
-
-      {relatedRecipes.length > 0 && (
-        <div className="related-recipes">
-          <h2>Receitas Relacionadas</h2>
-          <div className="related-grid">
-            {relatedRecipes.map(({ id, recipe: relRecipe }) => (
-              <RecipeCard
-                key={id}
-                recipe={relRecipe}
-                id={id}
-                isFavorite={favorites.includes(id)}
-                onToggleFavorite={toggleFavorite}
-              />
-            ))}
+          <h3>Modo de Preparo e Instruções</h3>
+          <div className="manual-content" style={{ whiteSpace: 'pre-line', padding: '10px' }}>
+            {recipe.manual2}
           </div>
         </div>
-      )}
+        
+        <div className="card-config">
+          <h3>Informações do Chef</h3>
+          <p><strong>Publicado por:</strong> {recipe.chefe?.nomeCompleto}</p>
+          <p><strong>Contato:</strong> {recipe.chefe?.gmail}</p>
+        </div>
+      </div>
     </div>
   );
 }
