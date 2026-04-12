@@ -1,5 +1,5 @@
 .home {
-  background: #f5f3ef;
+  background: #EDE6DB;
   min-height: 100vh;
 }
 
@@ -20,8 +20,8 @@
 
 .tag-intro {
   display: inline-block;
-  background: #dfe9e1;
-  color: #2f5d3a;
+  background: #1F6B3A;
+  color: #fff;
   padding: 8px 18px;
   border-radius: 20px;
   font-size: 14px;
@@ -32,7 +32,7 @@
   font-family: 'Playfair Display', serif;
   font-size: 64px;
   line-height: 1.1;
-  color: #2d2019;
+  color: #F27A1A;
   margin-bottom: 20px;
 }
 
@@ -61,12 +61,12 @@
 }
 
 .btn-primary {
-  background: #2f6b3f;
+  background: #F27A1A;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #255732;
+  background: #d96810;
 }
 
 .btn-secondary {
@@ -117,7 +117,7 @@
 .highlights-header h2 {
   font-family: 'Playfair Display', serif;
   font-size: 48px;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 10px;
 }
 

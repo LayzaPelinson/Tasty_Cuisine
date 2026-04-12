@@ -1,5 +1,5 @@
 .recipes-page {
-  background: #f5f3ef;
+  background: #EDE6DB;
   min-height: 100vh;
   padding: 40px 20px;
 }
@@ -16,7 +16,7 @@
 .recipes-header h1 {
   font-family: 'Playfair Display', serif;
   font-size: 48px;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 10px;
 }
 

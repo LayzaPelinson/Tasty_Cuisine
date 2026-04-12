@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 200px);
-  background: #f5f3ef;
+  background: #EDE6DB;
   padding: 40px 20px;
 }
 
@@ -38,12 +38,12 @@
 }
 
 .login-tab.active {
-  color: #2f6b3f;
-  border-bottom-color: #2f6b3f;
+  color: #F27A1A;
+  border-bottom-color: #F27A1A;
 }
 
 .login-tab:hover {
-  color: #2f6b3f;
+  color: #F27A1A;
 }
 
 /* PAINEL */
@@ -77,7 +77,7 @@
 .login-form h2 {
   font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
-  color: #2d1400;
+  color: #F27A1A;
   margin: 0 0 10px 0;
   text-align: center;
 }
@@ -108,8 +108,8 @@
 
 .login-form input:focus {
   outline: none;
-  border-color: #2f6b3f;
-  box-shadow: 0 0 0 3px rgba(47, 107, 63, 0.1);
+  border-color: #F27A1A;
+  box-shadow: 0 0 0 3px rgba(242, 122, 26, 0.1);
 }
 
 .login-erro {
@@ -128,7 +128,7 @@
 
 .btn-login {
   padding: 12px;
-  background: #2f6b3f;
+  background: #F27A1A;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -140,7 +140,7 @@
 }
 
 .btn-login:hover {
-  background: #255732;
+  background: #d96810;
 }
 
 .login-rodape {
@@ -151,7 +151,7 @@
 }
 
 .login-rodape a {
-  color: #2f6b3f;
+  color: #F27A1A;
   text-decoration: none;
   font-weight: 500;
   cursor: pointer;

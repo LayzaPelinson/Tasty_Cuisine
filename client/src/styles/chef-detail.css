@@ -1,5 +1,5 @@
 .chef-detail {
-  background: #f5f3ef;
+  background: #EDE6DB;
   min-height: 100vh;
   padding: 40px 60px;
   max-width: 1200px;
@@ -10,7 +10,7 @@
   background: none;
   border: none;
   font-size: 16px;
-  color: #2f6b3f;
+  color: #F27A1A;
   cursor: pointer;
   margin-bottom: 30px;
   padding: 0;
@@ -19,7 +19,7 @@
 }
 
 .btn-back:hover {
-  color: #255732;
+  color: #d96810;
 }
 
 .chef-hero {
@@ -49,13 +49,13 @@
 .chef-info-section h1 {
   font-family: 'Playfair Display', serif;
   font-size: 48px;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 10px;
 }
 
 .specialty {
   font-size: 20px;
-  color: #2f6b3f;
+  color: #F27A1A;
   font-weight: 600;
   margin-bottom: 10px;
 }
@@ -87,7 +87,7 @@
 .stat-number {
   font-size: 32px;
   font-weight: bold;
-  color: #2f6b3f;
+  color: #F27A1A;
 }
 
 .stat-label {
@@ -103,7 +103,7 @@
 .chef-recipes h2 {
   font-family: 'Playfair Display', serif;
   font-size: 36px;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 30px;
   text-align: center;
 }

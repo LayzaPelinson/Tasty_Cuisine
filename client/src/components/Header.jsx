@@ -18,6 +18,8 @@ export default function Header() {
 
   return (
     <header className="header">
+      <Link href="/" className="header-logo">Tasty Cuisine</Link>
+
       <nav className={`nav ${menuOpen ? 'nav-open' : 'nav-closed'}`}>
         <ul>
           {navLinks.map(link => (

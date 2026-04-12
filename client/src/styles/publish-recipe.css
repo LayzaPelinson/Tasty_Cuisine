@@ -1,5 +1,5 @@
 .publish-page {
-  background: #f5f3ef;
+  background: #EDE6DB;
   min-height: 100vh;
   padding: 40px 20px;
 }
@@ -16,7 +16,7 @@
 .publish-container h1 {
   font-family: 'Playfair Display', serif;
   font-size: 36px;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 10px;
 }
 
@@ -65,8 +65,8 @@
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #2f6b3f;
-  box-shadow: 0 0 0 3px rgba(47, 107, 63, 0.1);
+  border-color: #F27A1A;
+  box-shadow: 0 0 0 3px rgba(242, 122, 26, 0.1);
 }
 
 .form-group textarea {
@@ -76,7 +76,7 @@
 
 .publish-form button {
   padding: 14px 24px;
-  background: #2f6b3f;
+  background: #F27A1A;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -88,7 +88,7 @@
 }
 
 .publish-form button:hover {
-  background: #255732;
+  background: #d96810;
 }
 
 @media (max-width: 768px) {

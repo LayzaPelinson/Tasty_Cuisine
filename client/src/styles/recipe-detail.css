@@ -1,5 +1,5 @@
 .recipe-detail {
-  background: #f5f3ef;
+  background: #EDE6DB;
   min-height: 100vh;
   padding: 40px 60px;
   max-width: 1200px;
@@ -10,7 +10,7 @@
   background: none;
   border: none;
   font-size: 16px;
-  color: #2f6b3f;
+  color: #F27A1A;
   cursor: pointer;
   margin-bottom: 30px;
   padding: 0;
@@ -19,7 +19,7 @@
 }
 
 .btn-back:hover {
-  color: #255732;
+  color: #d96810;
 }
 
 .recipe-hero {
@@ -49,7 +49,7 @@
 .recipe-hero-info h1 {
   font-family: 'Playfair Display', serif;
   font-size: 48px;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 20px;
 }
 
@@ -90,16 +90,16 @@
 }
 
 .btn-save {
-  background: #2f6b3f;
+  background: #F27A1A;
   color: #fff;
 }
 
 .btn-save:hover {
-  background: #255732;
+  background: #d96810;
 }
 
 .btn-save.saved {
-  background: #2f6b3f;
+  background: #F27A1A;
 }
 
 .btn-share {
@@ -129,7 +129,7 @@
 .card-config h3 {
   font-family: 'Playfair Display', serif;
   font-size: 24px;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 20px;
 }
 
@@ -152,7 +152,7 @@
   content: '✓';
   position: absolute;
   left: 0;
-  color: #2f6b3f;
+  color: #1F6B3A;
   font-weight: bold;
 }
 
@@ -169,7 +169,7 @@
   content: counter(item);
   position: absolute;
   left: 0;
-  background: #2f6b3f;
+  background: #1F6B3A;
   color: #fff;
   width: 24px;
   height: 24px;
@@ -182,7 +182,7 @@
 }
 
 .recipe-tip {
-  background: #dfe9e1;
+  background: #EDE6DB;
   padding: 30px;
   border-radius: 16px;
   margin-bottom: 60px;
@@ -191,12 +191,12 @@
 .recipe-tip h3 {
   font-family: 'Playfair Display', serif;
   font-size: 20px;
-  color: #2f5d3a;
+  color: #1F6B3A;
   margin-bottom: 15px;
 }
 
 .recipe-tip p {
-  color: #2f5d3a;
+  color: #1F6B3A;
   line-height: 1.6;
 }
 
@@ -207,7 +207,7 @@
 .related-recipes h2 {
   font-family: 'Playfair Display', serif;
   font-size: 36px;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 30px;
   text-align: center;
 }

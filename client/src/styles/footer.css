@@ -3,8 +3,8 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 40px 60px;
-  background-color: #f5f3ef;
-  border-top: 1px solid #ddd;
+  background-color: #F27A1A;
+  border-top: none;
 }
 
 .footer-left {
@@ -14,13 +14,13 @@
 .footer-left h3 {
   font-family: 'Playfair Display', serif;
   font-size: 24px;
-  color: #2d1400;
+  color: #fff;
   margin-bottom: 10px;
 }
 
 .footer-left p {
   font-size: 14px;
-  color: #666;
+  color: #fff;
 }
 
 .footer-right {
@@ -43,17 +43,17 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  color: #666;
+  background-color: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #fff;
   transition: 0.3s;
   text-decoration: none;
 }
 
 .social-links a:hover {
-  background-color: #2f6b3f;
+  background-color: rgba(255,255,255,0.35);
   color: #fff;
-  border-color: #2f6b3f;
+  border-color: #fff;
 }
 
 .social-links svg {
@@ -67,7 +67,7 @@
 
 .credits p {
   font-size: 14px;
-  color: #666;
+  color: #fff;
 }
 
 @media (max-width: 768px) {

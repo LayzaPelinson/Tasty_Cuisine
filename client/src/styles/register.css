@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #f5f3ef;
+  background: #EDE6DB;
   padding: 40px 20px;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .register-header h1 {
-  color: #2f6b3f;
+  color: #F27A1A;
   margin: 0 0 8px 0;
   font-size: 2.2rem;
   font-weight: 700;
@@ -63,8 +63,8 @@
 
 .register-form input:focus {
   outline: none;
-  border-color: #2f6b3f;
-  box-shadow: 0 0 0 3px rgba(47, 107, 63, 0.1);
+  border-color: #F27A1A;
+  box-shadow: 0 0 0 3px rgba(242, 122, 26, 0.1);
 }
 
 .register-button {
@@ -72,7 +72,7 @@
   padding: 14px;
   border: none;
   border-radius: 8px;
-  background-color: #2f6b3f;
+  background-color: #F27A1A;
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
@@ -80,7 +80,7 @@
 }
 
 .register-button:hover {
-  background-color: #245230;
+  background-color: #d96810;
 }
 
 .register-error {
@@ -100,7 +100,7 @@
 }
 
 .register-footer a {
-  color: #2f6b3f;
+  color: #F27A1A;
   text-decoration: none;
   font-weight: 700;
 }
@@ -127,13 +127,13 @@
 }
 
 .register-tab.active {
-  color: #2f6b3f;
-  border-bottom-color: #2f6b3f;
+  color: #F27A1A;
+  border-bottom-color: #F27A1A;
 }
 
 .register-tab:hover:not(.active) {
   background-color: #f9f9f9;
-  color: #2f6b3f;
+  color: #F27A1A;
 }
 
 /* O restante do seu CSS do register.container continua o mesmo... */

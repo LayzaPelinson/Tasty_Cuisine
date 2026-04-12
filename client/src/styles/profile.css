@@ -2,7 +2,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
-  background: #f5f3ef;
+  background: #EDE6DB;
   min-height: 100vh;
 }
 
@@ -38,7 +38,7 @@
 .perfil-info h1 {
   font-family: 'Playfair Display', serif;
   font-size: 1.8rem;
-  color: #2d1400;
+  color: #F27A1A;
   margin: 0;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .btn-editar {
-  background: #2f6b3f;
+  background: #F27A1A;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -59,7 +59,7 @@
 }
 
 .btn-editar:hover {
-  background: #1f4a2a;
+  background: #d96810;
 }
 
 /* EDIÇÃO */
@@ -104,18 +104,18 @@
 }
 
 .tag-editavel:hover {
-  border-color: #2f6b3f;
+  border-color: #F27A1A;
   background: #f5f5f5;
 }
 
 .tag-editavel.ativo {
-  background: #2f6b3f;
+  background: #F27A1A;
   color: white;
-  border-color: #2f6b3f;
+  border-color: #F27A1A;
 }
 
 .btn-salvar {
-  background: #2f6b3f;
+  background: #F27A1A;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -127,7 +127,7 @@
 }
 
 .btn-salvar:hover {
-  background: #1f4a2a;
+  background: #d96810;
 }
 
 /* ABAS */
@@ -150,12 +150,12 @@
 }
 
 .perfil-tabs button.active {
-  color: #2f6b3f;
-  border-bottom-color: #2f6b3f;
+  color: #F27A1A;
+  border-bottom-color: #F27A1A;
 }
 
 .perfil-tabs button:hover {
-  color: #2f6b3f;
+  color: #F27A1A;
 }
 
 /* TAB CONTENT */
@@ -173,7 +173,7 @@
 .titulo h2 {
   font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
-  color: #2d1400;
+  color: #F27A1A;
   margin: 0;
 }
 
@@ -201,7 +201,7 @@
 
 .card-config h3 {
   font-size: 1.2rem;
-  color: #2d1400;
+  color: #F27A1A;
   margin-top: 0;
   margin-bottom: 10px;
 }
@@ -229,9 +229,9 @@
 }
 
 .tag.ativo {
-  background: #2f6b3f;
+  background: #1F6B3A;
   color: white;
-  border-color: #2f6b3f;
+  border-color: #1F6B3A;
 }
 
 .linha {
@@ -248,7 +248,7 @@
 
 .linha div strong {
   display: block;
-  color: #2d1400;
+  color: #F27A1A;
   margin-bottom: 5px;
 }
 
