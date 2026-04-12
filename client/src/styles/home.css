@@ -79,6 +79,11 @@
   background: #f9f9f9;
 }
 
+.btn-locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .presentation-images {
   flex: 1;
   display: grid;
@@ -131,6 +136,37 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
 }
+
+.locked-card {
+  position: relative;
+  cursor: pointer;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.locked-card .recipe-card-image img,
+.locked-card .recipe-card-content {
+  filter: blur(4px);
+  user-select: none;
+}
+
+.locked-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.locked-overlay span { font-size: 2rem; }
 
 @media (max-width: 1024px) {
   .presentation {

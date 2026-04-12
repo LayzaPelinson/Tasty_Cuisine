@@ -59,6 +59,19 @@
   border-radius: 4px;
 }
 
+.nav-logout-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-family: inherit;
+}
+
 .nav ul li a:hover {
   color: #4a2c2a;
   background-color: rgba(255, 255, 255, 0.1);

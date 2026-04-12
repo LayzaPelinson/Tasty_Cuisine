@@ -50,9 +50,7 @@ export default function Login() {
         localStorage.setItem('userType', result.user.tipo);
         localStorage.setItem('userName', result.user.nome);
         localStorage.setItem('userEmail', result.user.email);
-
-        console.log('Login bem-sucedido:', result.user);
-        setLocation('/');
+        window.location.href = '/';
       } else {
         setError(result.error || 'Erro ao fazer login');
       }
