@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoute } from 'wouter';
-import { receitas } from '../data/recipes.js';
-import { receitasAPI } from '../lib/api.ts'; 
+import { receitasAPI, apiCall, API_ENDPOINTS } from '../lib/api.ts'; 
 import { useFavorites, useHistory } from '../hooks/useFavorites.js';
 import '../styles/recipe-detail.css';
 
@@ -9,121 +8,118 @@ export default function RecipeDetail() {
   const [match, params] = useRoute('/receita/:id');
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { favorites, toggleFavorite } = useFavorites();
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [rating, setRating] = useState(5);
+  const { favorites = [], toggleFavorite } = useFavorites();
   const { addToHistory } = useHistory();
 
-  const goBack = () => window.history.back();
+  const userId = localStorage.getItem('userId');
+  const userType = localStorage.getItem('userType');
+
+  const fetchComments = async () => {
+    try {
+      const response = await apiCall(API_ENDPOINTS.COMENTARIOS_ALL);
+      if (response && Array.isArray(response.data)) {
+        const recipeComments = response.data.filter(c => 
+          c.receita && (c.receita.codReceitas.toString() === params.id)
+        );
+        setComments(recipeComments);
+      }
+    } catch (err) { console.error("Erro ao buscar comentários:", err); }
+  };
 
   useEffect(() => {
     async function getDetail() {
-      if (!params?.id) { setLoading(false); return; }
-
-      const response = await receitasAPI.getById(params.id);
-      if (response.data) {
-        setRecipe(response.data);
-        addToHistory(params.id);
-        setLoading(false);
-        return;
-      }
-
-      const local = receitas[params.id];
-      if (local) {
-        setRecipe({
-          nomeReceita: local.nome,
-          descricao: local.descricao,
-          manual2: local.preparo?.join('\n') || '',
-          imagem: local.imagem,
-          tempo: local.tempo,
-          dificuldade: local.dificuldade,
-          categoria: local.categoria,
-          ingredientes: local.ingredientes,
-          dica: local.dica,
-          chefe: { nomeCompleto: local.chef },
-          codReceitas: params.id,
-          _isLocal: true,
-        });
-        addToHistory(params.id);
-      }
+      if (!params?.id) return;
+      try {
+        const response = await receitasAPI.getById(params.id);
+        if (response.data) {
+          setRecipe(response.data);
+          addToHistory(params.id);
+          fetchComments();
+        }
+      } catch (err) { console.error(err); }
       setLoading(false);
     }
     getDetail();
   }, [params?.id]);
 
-  if (loading) return <div className="recipe-detail"><p>Carregando detalhes...</p></div>;
-  if (!recipe) return <div className="recipe-detail"><p>Receita não encontrada.</p></div>;
+  const handleAddCommentAndRating = async (e) => {
+    e.preventDefault();
+    if (!userId || userType !== 'usuario') { 
+      alert("Apenas usuários comuns podem avaliar receitas."); 
+      return; 
+    }
 
-  const isSaved = favorites.includes(String(recipe.codReceitas));
+    try {
+      // 1. Enviar Comentário
+      const commentRes = await apiCall(API_ENDPOINTS.COMENTARIOS, { 
+        method: 'POST', 
+        body: JSON.stringify({
+          texto: newComment,
+          usuario: { codUser: parseInt(userId) },
+          receita: { codReceitas: parseInt(params.id) }
+        })
+      });
+
+      // 2. Enviar Avaliação
+      const ratingRes = await apiCall(API_ENDPOINTS.AVALIACOES, { 
+        method: 'POST', 
+        body: JSON.stringify({
+          nota: rating,
+          comentario: newComment,
+          usuario: { codUser: parseInt(userId) },
+          receita: { codReceitas: parseInt(params.id) }
+        })
+      });
+
+      if (!commentRes.error && !ratingRes.error) {
+        alert("Sua avaliação foi enviada com sucesso!");
+        setNewComment('');
+        fetchComments();
+      } else {
+        alert("Erro ao salvar no banco de dados. Verifique sua conexão.");
+      }
+    } catch (err) { alert("Erro ao processar sua participação."); }
+  };
+
+  if (loading) return <div className="recipe-detail"><p>Carregando...</p></div>;
+  if (!recipe) return <div className="recipe-detail"><p>Receita não encontrada.</p></div>;
 
   return (
     <div className="recipe-detail">
-      <button className="btn-back" onClick={goBack}>← Voltar</button>
-
       <div className="recipe-hero">
-        {recipe.imagem
-          ? <img src={recipe.imagem} alt={recipe.nomeReceita} />
-          : <div style={{width: '50%', height: '500px', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>🖼️</div>
-        }
+        <img src={recipe.fotoReceita || recipe.imagem || '/images/receita1.jpg'} alt={recipe.nomeReceita} />
         <div className="recipe-hero-info">
           <h1>{recipe.nomeReceita}</h1>
-          <div className="recipe-badges">
-            {recipe.categoria && <span className="badge">{recipe.categoria}</span>}
-            {recipe.dificuldade && <span className="tag tag-medium">{recipe.dificuldade}</span>}
-          </div>
-          <div className="recipe-info">
-            {recipe.tempo && <span>⏱ {recipe.tempo}</span>}
-            <span>👨‍🍳 {recipe.chefe?.nomeCompleto || 'Chef Autor'}</span>
-          </div>
-          <p>{recipe.descricao}</p>
-          <div className="recipe-actions">
-            <button
-              className={`btn-save ${isSaved ? 'saved' : ''}`}
-              onClick={() => toggleFavorite(String(recipe.codReceitas))}
-            >
-              {isSaved ? '♥ Receita Salva' : '♡ Salvar Receita'}
-            </button>
-          </div>
+          <button className={`btn-save ${favorites.includes(String(recipe.codReceitas)) ? 'saved' : ''}`} onClick={() => toggleFavorite(String(recipe.codReceitas))}>
+            {favorites.includes(String(recipe.codReceitas)) ? '♥ Salva' : '♡ Salvar'}
+          </button>
         </div>
       </div>
-
-      <div className="recipe-details">
-        {recipe._isLocal ? (
-          <>
-            <div className="card-config">
-              <h3>Ingredientes</h3>
-              <ul className="lista-verde">
-                {recipe.ingredientes?.map((ing, i) => <li key={i}>{ing}</li>)}
-              </ul>
-            </div>
-            <div className="card-config">
-              <h3>Modo de Preparo</h3>
-              <ol className="lista-numerada">
-                {recipe.manual2?.split('\n').map((step, i) => <li key={i}>{step}</li>)}
-              </ol>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="card-config">
-              <h3>Modo de Preparo e Instruções</h3>
-              <div className="manual-content" style={{ whiteSpace: 'pre-line', padding: '10px' }}>
-                {recipe.manual2}
-              </div>
-            </div>
-            <div className="card-config">
-              <h3>Informações do Chef</h3>
-              <p><strong>Publicado por:</strong> {recipe.chefe?.nomeCompleto}</p>
-              <p><strong>Contato:</strong> {recipe.chefe?.gmail}</p>
-            </div>
-          </>
+      <div className="recipe-details"><div className="card-config"><h3>Modo de Preparo</h3><p style={{whiteSpace:'pre-line'}}>{recipe.manual2}</p></div></div>
+      
+      <div className="comments-section" style={{ marginTop: '40px', padding: '20px', background: '#fff', borderRadius: '12px' }}>
+        <h3>Comentários da Comunidade ({comments.length})</h3>
+        {userType === 'usuario' && (
+          <form onSubmit={handleAddCommentAndRating} style={{marginBottom:'20px'}}>
+            <select value={rating} onChange={(e) => setRating(parseInt(e.target.value))} style={{marginBottom:'10px', padding:'5px'}}>
+              {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Estrelas</option>)}
+            </select>
+            <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Sua opinião..." required style={{width:'100%', minHeight:'80px', padding:'10px'}} />
+            <button type="submit" className="btn-salvar" style={{marginTop:'10px'}}>Publicar Avaliação</button>
+          </form>
         )}
-      </div>
-
-      {recipe.dica && (
-        <div className="recipe-tip">
-          <h3>💡 Dica do Chef</h3>
-          <p>{recipe.dica}</p>
+        <div className="comments-list">
+          {comments.map((c, i) => (
+            <div key={i} style={{ padding: '15px', borderBottom: '1px solid #eee' }}>
+              <strong>{c.usuario?.nomeCompleto || 'Usuário'}</strong>
+              <p style={{margin:'5px 0'}}>{c.texto}</p>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }

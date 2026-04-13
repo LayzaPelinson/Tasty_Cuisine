@@ -1,25 +1,57 @@
-import { useState, useMemo } from 'react';
-import { receitas } from '../data/recipes.js';
+import React, { useState, useMemo, useEffect } from 'react';
+import { receitasAPI } from '../lib/api';
 import { useFavorites } from '../hooks/useFavorites.js';
 import RecipeCard from '../components/RecipeCard.jsx';
 import '../styles/recipes.css';
 
 export default function Recipes() {
-  const { favorites, toggleFavorite } = useFavorites();
+  const { favorites = [], toggleFavorite } = useFavorites();
   const [searchTerm, setSearchTerm] = useState('');
+  const [dbRecipes, setDbRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await receitasAPI.getAll();
+        // VERIFICAÇÃO DE SEGURANÇA: Garante que dbRecipes seja sempre um Array
+        if (response && Array.isArray(response.data)) {
+          setDbRecipes(response.data);
+        } else {
+          setDbRecipes([]);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar receitas:", err);
+        setDbRecipes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRecipes();
+  }, []);
+
+  const normalizedRecipes = useMemo(() => {
+    if (!Array.isArray(dbRecipes)) return [];
+    return dbRecipes.map(recipe => ({
+      id: recipe.codReceitas?.toString() || Math.random().toString(),
+      nome: recipe.nomeReceita || 'Sem nome',
+      descricao: recipe.descricao || '',
+      imagem: recipe.fotoReceita || '/images/receita1.jpg',
+      tempo: '30 min',
+      chef: recipe.chefe?.nomeCompleto || 'Chef Tasty',
+      dificuldade: 'Médio',
+      categoria: 'Geral'
+    }));
+  }, [dbRecipes]);
 
   const filteredRecipes = useMemo(() => {
-    const term = searchTerm.toLowerCase().trim();
-    if (!term) return Object.entries(receitas);
+    return normalizedRecipes.filter(r => 
+      r.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      r.chef.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, normalizedRecipes]);
 
-    return Object.entries(receitas).filter(([, recipe]) => {
-      return (
-        recipe.nome.toLowerCase().includes(term) ||
-        recipe.chef.toLowerCase().includes(term) ||
-        recipe.ingredientes.some(i => i.toLowerCase().includes(term))
-      );
-    });
-  }, [searchTerm]);
+  if (loading) return <div className="recipes-page">Carregando receitas...</div>;
 
   return (
     <div className="recipes-page">
@@ -27,33 +59,28 @@ export default function Recipes() {
         <h1>Nossas Receitas</h1>
         <p>Explore nossa coleção de receitas saudáveis.</p>
       </div>
-
       <div className="search-container">
-        <i className="search-icon">🔍</i>
         <input
           type="text"
-          placeholder="Buscar por nome, chef ou ingredientes..."
+          placeholder="Buscar por nome ou chef..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
       </div>
-
       <div className="recipes-grid">
         {filteredRecipes.length > 0 ? (
-          filteredRecipes.map(([id, recipe]) => (
+          filteredRecipes.map((recipe) => (
             <RecipeCard
-              key={id}
+              key={recipe.id}
               recipe={recipe}
-              id={id}
-              isFavorite={favorites.includes(id)}
+              id={recipe.id}
+              isFavorite={Array.isArray(favorites) && favorites.includes(recipe.id)}
               onToggleFavorite={toggleFavorite}
             />
           ))
         ) : (
-          <div className="no-results">
-            <p>Nenhuma receita encontrada. Tente outro termo de busca.</p>
-          </div>
+          <div className="no-results"><p>Nenhuma receita encontrada.</p></div>
         )}
       </div>
     </div>

@@ -1,26 +1,71 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { receitasAPI, chefesAPI } from '../lib/api.ts';
 import '../styles/publish-recipe.css';
 
 export default function PublishRecipe() {
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
-    nome: '',
+    nomeReceita: '',
     descricao: '',
-    tempo: '',
-    dificuldade: 'Fácil',
-    categoria: 'Almoço',
-    ingredientes: '',
-    preparo: '',
-    dica: ''
+    manual2: '',
+    imagem: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Receita enviada com sucesso! (Esta é uma página de demonstração)');
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const userId = localStorage.getItem('userId');
+      
+      // Buscar os dados do chefe
+      const chefResponse = await chefesAPI.getById(userId);
+      
+      if (!chefResponse.data) {
+        setError('Erro ao carregar dados do chef');
+        setLoading(false);
+        return;
+      }
+
+      const payload = {
+        nomeReceita: formData.nomeReceita,
+        descricao: formData.descricao,
+        manual2: formData.manual2,
+        imagem: formData.imagem,
+        chefe: chefResponse.data // ← Envia o objeto completo do chefe
+      };
+
+      const response = await receitasAPI.create(payload);
+
+      if (response.data) {
+        setSuccess(true);
+        alert('✅ Receita publicada com sucesso!');
+        setFormData({
+          nomeReceita: '',
+          descricao: '',
+          manual2: '',
+          imagem: ''
+        });
+        setTimeout(() => setLocation('/receitas'), 2000);
+      } else {
+        setError(response.error || 'Erro ao publicar receita');
+      }
+    } catch (err) {
+      setError('Erro ao publicar receita: ' + (err instanceof Error ? err.message : 'Desconhecido'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,66 +74,25 @@ export default function PublishRecipe() {
         <h1>Publicar Sua Receita</h1>
         <p>Compartilhe sua receita favorita com nossa comunidade</p>
 
-        <form onSubmit={handleSubmit} className="publish-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="nome">Nome da Receita</label>
-              <input
-                type="text"
-                id="nome"
-                name="nome"
-                value={formData.nome}
-                onChange={handleChange}
-                placeholder="Ex: Bolo de Chocolate"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="tempo">Tempo de Preparo</label>
-              <input
-                type="text"
-                id="tempo"
-                name="tempo"
-                value={formData.tempo}
-                onChange={handleChange}
-                placeholder="Ex: 30 min"
-                required
-              />
-            </div>
-          </div>
+        {error && <div className="error-message" style={{color: '#d32f2f', padding: '10px', marginBottom: '20px', backgroundColor: '#ffebee', borderRadius: '8px'}}>{error}</div>}
+        {success && <div className="success-message" style={{color: '#388e3c', padding: '10px', marginBottom: '20px', backgroundColor: '#e8f5e9', borderRadius: '8px'}}>✅ Receita publicada com sucesso!</div>}
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="dificuldade">Dificuldade</label>
-              <select
-                id="dificuldade"
-                name="dificuldade"
-                value={formData.dificuldade}
-                onChange={handleChange}
-              >
-                <option>Fácil</option>
-                <option>Médio</option>
-                <option>Difícil</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="categoria">Categoria</label>
-              <select
-                id="categoria"
-                name="categoria"
-                value={formData.categoria}
-                onChange={handleChange}
-              >
-                <option>Almoço</option>
-                <option>Jantar</option>
-                <option>Café da Manhã</option>
-                <option>Lanche</option>
-              </select>
-            </div>
+        <form onSubmit={handleSubmit} className="publish-form">
+          <div className="form-group">
+            <label htmlFor="nomeReceita">Nome da Receita *</label>
+            <input
+              type="text"
+              id="nomeReceita"
+              name="nomeReceita"
+              value={formData.nomeReceita}
+              onChange={handleChange}
+              placeholder="Ex: Bolo de Chocolate"
+              required
+            />
           </div>
 
           <div className="form-group">
-            <label htmlFor="descricao">Descrição</label>
+            <label htmlFor="descricao">Descrição *</label>
             <textarea
               id="descricao"
               name="descricao"
@@ -101,24 +105,11 @@ export default function PublishRecipe() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="ingredientes">Ingredientes (um por linha)</label>
+            <label htmlFor="manual2">Modo de Preparo (um passo por linha) *</label>
             <textarea
-              id="ingredientes"
-              name="ingredientes"
-              value={formData.ingredientes}
-              onChange={handleChange}
-              placeholder="2 xícaras de farinha&#10;1 ovo&#10;..."
-              rows={6}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="preparo">Modo de Preparo (um passo por linha)</label>
-            <textarea
-              id="preparo"
-              name="preparo"
-              value={formData.preparo}
+              id="manual2"
+              name="manual2"
+              value={formData.manual2}
               onChange={handleChange}
               placeholder="1. Misture os ingredientes&#10;2. Despeje na forma&#10;..."
               rows={6}
@@ -127,19 +118,20 @@ export default function PublishRecipe() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="dica">Dica do Chef</label>
-            <textarea
-              id="dica"
-              name="dica"
-              value={formData.dica}
+            <label htmlFor="imagem">URL da Imagem *</label>
+            <input
+              type="url"
+              id="imagem"
+              name="imagem"
+              value={formData.imagem}
               onChange={handleChange}
-              placeholder="Compartilhe uma dica especial..."
-              rows={3}
+              placeholder="Ex: https://example.com/imagem.jpg"
+              required
             />
           </div>
 
-          <button type="submit" className="btn btn-primary">
-            Publicar Receita
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? 'Publicando...' : 'Publicar Receita'}
           </button>
         </form>
       </div>

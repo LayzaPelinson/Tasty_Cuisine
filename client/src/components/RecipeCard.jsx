@@ -14,31 +14,32 @@ export default function RecipeCard({
     return 'tag-hard';
   };
 
+  const recipeImage = recipe.fotoReceita || recipe.imagem || '/images/receita1.jpg';
+
   return (
     <Link href={`/receita/${id}`}>
       <article className={`recipe-card ${isHighlight ? 'recipe-card-highlight' : ''}`}>
         <div className="recipe-card-image">
-          <span className="badge">{recipe.categoria}</span>
+          <span className="badge">{recipe.categoria || 'Geral'}</span>
           <button
             className="favorite-btn"
             onClick={(e) => {
               e.preventDefault();
               onToggleFavorite(id);
             }}
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           >
             {isFavorite ? '♥' : '♡'}
           </button>
-          <img src={recipe.imagem} alt={recipe.nome} />
+          <img src={recipeImage} alt={recipe.nome} />
         </div>
         <div className="recipe-card-content">
           <h3>{recipe.nome}</h3>
           <div className="recipe-info">
-            <span>⏱ {recipe.tempo}</span>
-            <span>👨🍳 {recipe.chef}</span>
+            <span>⏱ {recipe.tempo || '30 min'}</span>
+            <span>👨‍🍳 {recipe.chef || 'Chef Tasty'}</span>
           </div>
-          <span className={`tag ${getDifficultyClass(recipe.dificuldade)}`}>
-            {recipe.dificuldade}
+          <span className={`tag ${getDifficultyClass(recipe.dificuldade || 'Médio')}`}>
+            {recipe.dificuldade || 'Médio'}
           </span>
         </div>
       </article>

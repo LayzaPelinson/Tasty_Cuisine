@@ -14,7 +14,6 @@ import About from "./pages/About.jsx";
 import Login from "./pages/Login.tsx";
 import Profile from "./pages/Profile.jsx";
 import PublishRecipe from "./pages/PublishRecipe.jsx";
-import ChefProfile from "./pages/ChefProfile.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Cadastro from './pages/Register.jsx';
 import "./styles/app.css";
@@ -23,7 +22,6 @@ function ProtectedRoute({ component: Component, chefOnly = false }) {
   const [, setLocation] = useLocation();
   const isLogged = localStorage.getItem('isLogged') === 'true';
   const isChefe = localStorage.getItem('userType') === 'chefe';
-
   if (!isLogged) { setLocation('/login'); return null; }
   if (chefOnly && !isChefe) { setLocation('/'); return null; }
   return <Component />;
@@ -44,9 +42,7 @@ function Router() {
           <Route path="/chef/:id" component={() => <ProtectedRoute component={ChefDetail} />} />
           <Route path="/quem-somos" component={() => <ProtectedRoute component={About} />} />
           <Route path="/perfil" component={() => <ProtectedRoute component={Profile} />} />
-          <Route path="/perfil-chefe" component={() => <ProtectedRoute component={ChefProfile} chefOnly={true} />} />
           <Route path="/publicar-receita" component={() => <ProtectedRoute component={PublishRecipe} chefOnly={true} />} />
-          <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
       </main>
