@@ -94,6 +94,33 @@ export default function Profile() {
       alert("Erro ao atualizar perfil.");
     }
   };
+  const handleDeleteProfile = async () => {
+    const confirmacao = window.confirm(
+      "TEM CERTEZA? Esta ação é permanente e excluirá todos os seus dados, incluindo receitas e favoritos."
+    );
+
+    if (confirmacao) {
+      try {
+        const api = userType === 'chefe' ? chefesAPI : usuariosAPI;
+        
+        // Realiza a chamada de delete usando o ID do usuário logado
+        const response = await api.delete(userId);
+
+        if (!response.error) {
+          alert("Sua conta foi excluída com sucesso.");
+          // Limpa o localStorage e redireciona para a Home
+          localStorage.clear();
+          setLocation('/'); 
+          window.location.reload();
+        } else {
+          alert("Erro ao excluir perfil. Tente novamente mais tarde.");
+        }
+      } catch (error) {
+        console.error("Erro ao deletar conta:", error);
+        alert("Ocorreu um erro técnico ao tentar excluir sua conta.");
+      }
+    }
+  };
 
    const handleDeleteRecipe = async (recipeId) => {
     if (window.confirm("Tem certeza que deseja excluir esta receita? Isso removerá todos os comentários, avaliações e favoritos vinculados a ela.")) {
@@ -175,6 +202,24 @@ export default function Profile() {
               </>
             )}
             <button className="btn-salvar" onClick={handleSaveProfile}>Salvar Alterações</button>
+            {/* Botão de Excluir Perfil */}
+        <button 
+          className="btn-delete-account" 
+          onClick={handleDeleteProfile}
+          style={{
+            marginTop: '20px',
+            backgroundColor: '#dc3545',
+            color: 'white',
+            border: 'none',
+            padding: '10px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            width: '100%'
+          }}
+        >
+          Excluir Minha Conta Permanentemente
+        </button>
           </div>
         </section>
       )}

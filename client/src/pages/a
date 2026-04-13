@@ -1,0 +1,11 @@
+{isEditing && (
+  <section className="perfil-edicao">
+    <div className="inputs">
+      {/* ... seus inputs de nome, email, etc ... */}
+      
+      <button className="btn-salvar" onClick={handleSaveProfile}>Salvar Alterações</button>
+      
+      
+    </div>
+  </section>
+)}
